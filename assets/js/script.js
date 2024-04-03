@@ -2,6 +2,10 @@
 let taskList = JSON.parse(localStorage.getItem("tasks"));
 let nextId = JSON.parse(localStorage.getItem("nextId"));
 
+// Grab references to DOM elements
+const taskTitleInput = $('#task-title-input');
+const taskDescriptionInput = $('#task-description-input');
+const taskDueDate = $('#task-due-date');
 
 // BS modal script
 const myModal = document.getElementById('myModal')
@@ -11,29 +15,41 @@ const myInput = document.getElementById('myInput')
 //   myInput.focus()
 // })
 
-
-
 // Todo: create a function to generate a unique task id
 function generateTaskId() {
-  if (nextId === null || nextId === undefined) {
-    //initalize nextId as 1
-    nextId = 1;
-  } else {
-    //increment nextId by 1
-    nextId++
-  }
-  return nextId;
+  return crypto.randomUUID()
 }
 
 // Todo: create a function to create a task card
 function createTaskCard(task) {
-  const todoCards = $('#todo-cards');
+  const taskCard = $('<div>')
+    .addClass('card task-card draggable my-3')
+    .attr('data-task-id', task.id);
+  const cardHeader = $('<div>').addClass('card-header h4').text(task.title);
+  const cardBody = $('<div>').addClass('card-body');
+  const cardDescription = $('<p>').addClass('card-text').text(task.description);
+  const cardDueDate = $('<p>').addClass('card-text').text(task.dueDate);
+  const cardDeleteBtn = $('<button>')
+    .addClass('btn btn-danger delete')
+    .text('Delete')
+    .attr('data-task-id', task.id);
+  cardDeleteBtn.on('click', handleDeleteTask);
 
-let card = $('<div>').addClass('card bg-primary');
-let cardHeader = $('<div>').addClass('card-header').text(task.title);
-let cardBody = $('<div>').addClass('card-body');
-let cardTextOne = $('<p>')
+  if (task.dueDate && task.status !== 'done') {
+    const now = dayjs();
+    const taskDueDate = dayjs(task.dueDate, 'DD/MM/YYYY');
 
+    if (now.isSame(taskDueDate, 'day')) {
+      taskCard.addClass('bg-warning text-white');
+    } else if (now.isAfter(taskDueDate)) {
+      taskCard.addClass('bg-danger text-white');
+      cardDeleteBtn.addClass('border-light');
+    }
+  }
+  cardBody.append(cardDescription, cardDueDate, cardDeleteBtn);
+  taskCard.append(cardHeader, cardBody);
+  
+  return taskCard;
 
 }
 
@@ -50,7 +66,7 @@ saveChanges.on('click', function () {
 
 // Todo: create a function to handle adding a new task
 function handleAddTask(event) {
-  // event.preventDefault();
+  event.preventDefault();
 
 
   let taskTitle = $('#task-title');
