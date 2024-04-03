@@ -102,10 +102,10 @@ function handleAddTask(event) {
 
   const taskTitle = taskTitleInput.val().trim();
   const taskDescription = taskDescriptionInput.val();
-  const taskDueDate = taskDueDateInput.val().dayjs().format('MM DD YYYY');
+  const taskDueDate = dayjs(taskDueDateInput.val()).format('MMM DD YYYY');
   
   const newTask = {
-    id: generateTaskId,
+    id: generateTaskId(),
     title: taskTitle,
     description: taskDescription,
     dueDate: taskDueDate,
@@ -121,9 +121,11 @@ function handleAddTask(event) {
   // clears the input fields
   taskTitleInput.val('');
   taskDescriptionInput.val('');
-  taskDueDate.val('');
+  taskDueDateInput.val('');
 }
 
+const saveChangesBtn = $('#save-changes');
+saveChangesBtn.on('click', handleAddTask);
 
 // Todo: create a function to handle deleting a task
 function handleDeleteTask(event) {
