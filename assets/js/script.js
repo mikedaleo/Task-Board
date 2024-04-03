@@ -5,7 +5,7 @@ let nextId = JSON.parse(localStorage.getItem("nextId"));
 // Grab references to DOM elements
 const taskTitleInput = $('#task-title-input');
 const taskDescriptionInput = $('#task-description-input');
-const taskDueDate = $('#task-due-date');
+const taskDueDateInput = $('#task-due-date');
 
 // BS modal script
 const myModal = document.getElementById('myModal')
@@ -15,9 +15,14 @@ const myInput = document.getElementById('myInput')
 //   myInput.focus()
 // })
 
+
+
 // Todo: create a function to generate a unique task id
 function generateTaskId() {
-  return crypto.randomUUID()
+  const timestamp = new Date().getTime();
+    const randomNum = Math.floor(Math.random() * 1000); // You can adjust the range as needed
+    const nextId = `task_${timestamp}_${randomNum}`;
+    return nextId;
 }
 
 // Todo: create a function to create a task card
@@ -57,37 +62,33 @@ function createTaskCard(task) {
 function renderTaskList() {
 
 }
-const saveChanges = $('#save-changes');
-
-saveChanges.on('click', function () {
-  handleAddTask()
-
-})
 
 // Todo: create a function to handle adding a new task
 function handleAddTask(event) {
   event.preventDefault();
 
-
-  let taskTitle = $('#task-title');
-  let taskTitleInput = taskTitle.val();
-  let dueDate = $('#date');
-  let dueDateInput = dueDate.val();
-  let taskDescription = $('#task-description');
-  let taskDescriptionInput = taskDescription.val();
-
-  let task = {
-    title: taskTitleInput,
-    date: dueDateInput,
-    description: taskDescriptionInput
+  const taskTitle = taskTitleInput.val().trim();
+  const taskDescription = taskDescriptionInput.val();
+  const taskDueDate = taskDueDateInput.val().dayjs().format('MM DD YYYY');
+  
+  const newTask = {
+    id: generateTaskId,
+    title: taskTitle,
+    description: taskDescription,
+    dueDate: taskDueDate,
+    status: 'to-do',
   };
+  const tasks = JSON.parse(localStorage.getItem('tasks'));
+  tasks.push(newTask);
 
-  console.log(task);
-  createTaskCard(task);
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+
+  renderTaskList();
+
   // clears the input fields
-  taskTitle.val('');
-  dueDate.val('');
-  taskDescription.val('');
+  taskTitleInput.val('');
+  taskDescriptionInput.val('');
+  taskDueDate.val('');
 }
 
 
