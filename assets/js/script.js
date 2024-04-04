@@ -1,25 +1,11 @@
-// Retrieve tasks and nextId from localStorage
-// let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
-// let nextId = JSON.parse(localStorage.getItem("nextId"));
-
-
-
-// BS modal script
-const myModal = document.getElementById('myModal')
-const myInput = document.getElementById('myInput')
-
-// myModal.addEventListener('shown.bs.modal', () => {
-//   myInput.focus()
-// })
-
 // save tasks to localStorage
 function saveToLocalStorage(tasks) {
-localStorage.setItem('tasks', JSON.stringify(tasks));
+  localStorage.setItem('tasks', JSON.stringify(tasks));
 };
 
 // read tasks from localStorage
 function readTasksFromStorage() {
-  let tasks = JSON.parse(localStorage.getItem("tasks")) ;
+  let tasks = JSON.parse(localStorage.getItem("tasks"));
   if (!tasks) {
     tasks = [];
   }
@@ -69,7 +55,8 @@ function createTaskCard(task) {
 
 // Todo: create a function to render the task list and make cards draggable
 function renderTaskList() {
-  const tasks = JSON.parse(localStorage.getItem('tasks'));
+  
+  const tasks = readTasksFromStorage();
 
   const todoList = $('#todo-cards');
   todoList.empty();
@@ -85,7 +72,7 @@ function renderTaskList() {
       todoList.append(createTaskCard(task));
     } else if (task.status === 'in-progress') {
       inProgressList.append(createTaskCard(task));
-    } else if (task.stats === 'done') {
+    } else if (task.status === 'done') {
       doneList.append(createTaskCard(task));
     }
   });
@@ -127,7 +114,7 @@ function handleAddTask(event) {
   const tasks = readTasksFromStorage();
   tasks.push(newTask);
 
-  localStorage.setItem('tasks', JSON.stringify(tasks));
+  saveToLocalStorage(tasks);
 
   renderTaskList();
 
@@ -137,8 +124,7 @@ function handleAddTask(event) {
   taskDueDateInput.val('');
 }
 
-const saveChangesBtn = $('#save-changes');
-saveChangesBtn.on('click', handleAddTask);
+
 
 // Todo: create a function to handle deleting a task
 function handleDeleteTask() {
@@ -159,10 +145,30 @@ function handleDeleteTask() {
 
 // Todo: create a function to handle dropping a task into a new status lane
 function handleDrop(event, ui) {
+  const tasks = readTasksFromStorage();
+  const taskId = ui.draggable[0].dataset.taskId;
+  const newStatus = event.target.id;
 
+  tasks.forEach((task) => {
+    if (task.id === taskId) {
+      task.status = newStatus;
+    }
+  });
+  saveToLocalStorage(tasks);
+  renderTaskList();
 }
 
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
 $(document).ready(function () {
+  renderTaskList();
+
+// when you click the "Save Changes" button, run handleAddTask function to push that information into the tasks array
+const saveChangesBtn = $('#save-changes');
+saveChangesBtn.on('click', handleAddTask);
+
+  $('.lane').droppable({
+    accept: '.draggable',
+    drop: handleDrop,
+  });
 
 });
