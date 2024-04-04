@@ -1,11 +1,8 @@
 // Retrieve tasks and nextId from localStorage
-let taskList = JSON.parse(localStorage.getItem("tasks"));
-let nextId = JSON.parse(localStorage.getItem("nextId"));
+// let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
+// let nextId = JSON.parse(localStorage.getItem("nextId"));
 
-// Grab references to DOM elements
-const taskTitleInput = $('#task-title-input');
-const taskDescriptionInput = $('#task-description-input');
-const taskDueDateInput = $('#task-due-date');
+
 
 // BS modal script
 const myModal = document.getElementById('myModal')
@@ -15,14 +12,26 @@ const myInput = document.getElementById('myInput')
 //   myInput.focus()
 // })
 
+// save tasks to localStorage
+function saveToLocalStorage(tasks) {
+localStorage.setItem('tasks', JSON.stringify(tasks));
+};
 
+// read tasks from localStorage
+function readTasksFromStorage() {
+  let tasks = JSON.parse(localStorage.getItem("tasks")) ;
+  if (!tasks) {
+    tasks = [];
+  }
+  return tasks;
+}
 
 // Todo: create a function to generate a unique task id
 function generateTaskId() {
   const timestamp = new Date().getTime();
-    const randomNum = Math.floor(Math.random() * 1000); // You can adjust the range as needed
-    const nextId = `task_${timestamp}_${randomNum}`;
-    return nextId;
+  const randomNum = Math.floor(Math.random() * 1000);
+  const nextId = `task_${timestamp}_${randomNum}`;
+  return nextId;
 }
 
 // Todo: create a function to create a task card
@@ -53,7 +62,7 @@ function createTaskCard(task) {
   }
   cardBody.append(cardDescription, cardDueDate, cardDeleteBtn);
   taskCard.append(cardHeader, cardBody);
-  
+
   return taskCard;
 
 }
@@ -79,31 +88,35 @@ function renderTaskList() {
     } else if (task.stats === 'done') {
       doneList.append(createTaskCard(task));
     }
-    });
+  });
 
-    $('.draggable').draggable({
-      opacity: 0.7,
-      zIndex: 100,
-      helper: function (e) {
-        const original = $(e.target).hasClass('ui-draggable')
-          ? $(e.target)
-          : $(e.target).closest('.ui-draggable');
-          return original.clone().css({
-            width: original.outerWidth(),
-          });
-      },
-    });
-  }
+  $('.draggable').draggable({
+    opacity: 0.7,
+    zIndex: 100,
+    helper: function (e) {
+      const original = $(e.target).hasClass('ui-draggable')
+        ? $(e.target)
+        : $(e.target).closest('.ui-draggable');
+      return original.clone().css({
+        width: original.outerWidth(),
+      });
+    },
+  });
+}
 
 
 // Todo: create a function to handle adding a new task
 function handleAddTask(event) {
   event.preventDefault();
+  // Grab references to DOM elements
+  const taskTitleInput = $('#task-title-input');
+  const taskDescriptionInput = $('#task-description-input');
+  const taskDueDateInput = $('#task-due-date');
 
   const taskTitle = taskTitleInput.val().trim();
   const taskDescription = taskDescriptionInput.val();
   const taskDueDate = dayjs(taskDueDateInput.val()).format('MMM DD YYYY');
-  
+
   const newTask = {
     id: generateTaskId(),
     title: taskTitle,
@@ -111,7 +124,7 @@ function handleAddTask(event) {
     dueDate: taskDueDate,
     status: 'to-do',
   };
-  const tasks = JSON.parse(localStorage.getItem('tasks'));
+  const tasks = readTasksFromStorage();
   tasks.push(newTask);
 
   localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -128,7 +141,19 @@ const saveChangesBtn = $('#save-changes');
 saveChangesBtn.on('click', handleAddTask);
 
 // Todo: create a function to handle deleting a task
-function handleDeleteTask(event) {
+function handleDeleteTask() {
+  const taskId = $(this).attr('data-task-id');
+  const tasks = readTasksFromStorage();
+
+  tasks.forEach((task) => {
+    if (task.id === taskId) {
+      tasks.splice(tasks.indexOf(task), 1)
+    }
+  });
+
+  saveToLocalStorage(tasks);
+
+  renderTaskList();
 
 }
 
