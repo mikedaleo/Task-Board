@@ -55,7 +55,7 @@ function createTaskCard(task) {
 
 // Todo: create a function to render the task list and make cards draggable
 function renderTaskList() {
-  
+
   const tasks = readTasksFromStorage();
 
   const todoList = $('#todo-cards');
@@ -162,9 +162,9 @@ function handleDrop(event, ui) {
 $(document).ready(function () {
   renderTaskList();
 
-// when you click the "Save Changes" button, run handleAddTask function to push that information into the tasks array
-const saveChangesBtn = $('#save-changes');
-saveChangesBtn.on('click', handleAddTask);
+  // when you click the "Save Changes" button, run handleAddTask function to push that information into the tasks array
+  const saveChangesBtn = $('#save-changes');
+  saveChangesBtn.on('click', handleAddTask);
 
   $('.lane').droppable({
     accept: '.draggable',
